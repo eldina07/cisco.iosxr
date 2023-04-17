@@ -347,7 +347,6 @@ def run(module, result):
 
     candidate_config = get_candidate(module)
     running_config = get_running_config(module)
-
     commands = None
     replace_file_path = None
     connection = get_connection(module)
@@ -359,11 +358,13 @@ def run(module, result):
             path=path,
             diff_replace=replace,
         )
+        print(response)
     except ConnectionError as exc:
         module.fail_json(msg=to_text(exc, errors="surrogate_then_replace"))
 
     config_diff = response.get("config_diff")
-
+    result["config_diff"] = config_diff
+    result["candidate_config"] = candidate_config
     if replace_config:
         running_base_diff_resp = connection.get_diff(
             candidate=running_config,
@@ -481,7 +482,7 @@ def main():
             result["warnings"].append(msg)
         else:
             result["warnings"] = msg
-
+    result["arno"] = "arno"
     module.exit_json(**result)
 
 
